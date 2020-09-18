@@ -1,0 +1,50 @@
+version: "3.4"
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: src/main/docker/DockerfileMysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3306:3306"
+    networks:
+      - qtest
+
+  qtest1:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile
+      args:
+        JAR_FILE: target/app.jar
+        UTIL_DIR: src/main/docker/
+    ports:
+      - "9080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - WAIT_FOR_IT=mysql:3306
+      - JAVA_OPTS=-Xmx512m -Xms256m -Dspring.profiles.active=docker-compose
+    networks:
+      - qtest
+
+  qtest2:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile
+      args:
+        JAR_FILE: target/app.jar
+        UTIL_DIR: src/main/docker/
+    ports:
+      - "9081:8080"
+    depends_on:
+      - mysql
+    environment:
+      - WAIT_FOR_IT=mysql:3306
+      - JAVA_OPTS=-Xmx512m -Xms256m -Dspring.profiles.active=docker-compose
+    networks:
+      - qtest
+
+
+networks:
+  qtest:

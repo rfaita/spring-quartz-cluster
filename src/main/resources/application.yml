@@ -1,0 +1,37 @@
+spring:
+  server:
+    port: 8080
+  datasource:
+    url: jdbc:mysql://localhost:3306/myapp?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  quartz:
+    job-store-type: jdbc #Database Mode
+    jdbc:
+      initialize-schema: never #Do not initialize table structure
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO #Default hostname and timestamp generate instance ID, which can be any string, but must be the only corresponding qrtz_scheduler_state INSTANCE_NAME field for all dispatchers
+            #instanceName: clusteredScheduler #quartzScheduler
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX #Persistence Configuration
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate #We only make database-specific proxies for databases
+            useProperties: false #Indicates that JDBC JobStore stores all values in JobDataMaps as strings, so more complex objects can be stored as name-value pairs rather than serialized in BLOB columns.In the long run, this is safer because you avoid serializing non-String classes to BLOB class versions.
+            tablePrefix: MYAPP_  #Database Table Prefix
+            misfireThreshold: 60000 #The number of milliseconds the dispatcher will "tolerate" a Trigger to pass its next startup time before being considered a "fire".The default value (if you do not enter this property in the configuration) is 60000 (60 seconds).
+            clusterCheckinInterval: 5000 #Set the frequency (in milliseconds) of this instance'checkin'* with other instances of the cluster.Affects the speed of detecting failed instances.
+            isClustered: true #Turn on Clustering
+          threadPool: #Connection Pool
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+
+---
+spring:
+  profiles: docker-compose
+  datasource:
+    url: jdbc:mysql://mysql:3306/myapp?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
